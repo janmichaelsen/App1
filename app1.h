@@ -16,7 +16,6 @@ struct order {
     char pizza_size;
     char pizza_category[20];
     char pizza_ingredients[200];
-    char pizza_name[100];
 
 };
 
