@@ -34,6 +34,10 @@ char* pls(int *size, struct order *orders) {
     return menos_vendida;
 }
 
+
+// REVISAR DMS Y DLS: no acumula las ventas por fecha
+
+
 char* dms(int *size, struct order *orders) {
     double valor_maxventas = 0.0;
     char *fecha_maxventas = NULL;
@@ -69,5 +73,147 @@ char* dls(int *size, struct order *orders) {
     }
 
     return fecha_minventas;
+}
+
+char* apo(int *size, struct order *orders) {
+    int total_pizzas = 0;
+
+    // Se suman todas las cantidades de pizzas
+    for (int i = 0; i < *size; i++) {
+        total_pizzas += orders[i].quantity;
+    }
+
+    // Calcular el promedio
+    double promedio_pizzas = (double) total_pizzas / *size;
+
+    // Convertir a string
+    static char result[50];
+    snprintf(result, sizeof(result), "%.2f", promedio_pizzas);
+
+    return result;
+}
+
+char* apd(int *size, struct order *orders) {
+    int total_pizzas = 0;
+    int dias_unicos = 0;
+    char *ultimo_dia = NULL;
+
+    // Se recorren las órdenes y se suman las pizzas por día
+    
+    for (int i = 0; i < *size; i++) {
+        total_pizzas += orders[i].quantity;
+
+        // Se cuentan los días únicos
+
+        if (ultimo_dia == NULL || strcmp(ultimo_dia, orders[i].order_date) != 0) {
+            dias_unicos++;
+            ultimo_dia = orders[i].order_date;
+        }
+    }
+
+    // Calcular promedio
+
+    double promedio_diario = (double) total_pizzas / dias_unicos;
+
+    // Convertir a string
+    
+    static char result[50];
+    snprintf(result, sizeof(result), "%.2f", promedio_diario);
+
+    return result;
+}
+
+char* ims(int *size, struct order *orders) {
+    struct cuenta_ingredientes {
+        char ingrediente[100];
+        int contador;
+    };
+
+    struct cuenta_ingredientes ingredientes[100];
+    int cuenta_ingredientes = 0;
+
+    for (int i = 0; i < *size; i++) {
+        char lista_ingredientes[200];
+        strcpy(lista_ingredientes, orders[i].pizza_ingredients);
+
+        char *token = strtok(lista_ingredientes, ", "); // Separa los ingredientes
+        while (token != NULL) {
+            int found = 0;
+            for (int j = 0; j < cuenta_ingredientes; j++) {
+                if (strcmp(ingredientes[j].ingrediente, token) == 0) {
+                    ingredientes[j].contador += orders[i].quantity;
+                    found = 1;
+                    break;
+                }
+            }
+
+            if (!found && cuenta_ingredientes < 100) {
+                strcpy(ingredientes[cuenta_ingredientes].ingrediente, token);
+                ingredientes[cuenta_ingredientes].contador = orders[i].quantity;
+                cuenta_ingredientes++;
+            }
+
+            token = strtok(NULL, ", ");
+
+        }
+    }
+
+    // Encontrar el ingrediente más vendido
+
+    int max_count = 0;
+    char *mas_vendido = malloc(100);
+    if (!mas_vendido) return "Error de memoria";
+
+    for (int i = 0; i < cuenta_ingredientes; i++) {
+        if (ingredientes[i].contador > max_count) {
+            max_count = ingredientes[i].contador;
+            strcpy(mas_vendido, ingredientes[i].ingrediente);
+        }
+    }
+
+    return mas_vendido;
+} 
+
+char* hp(int *size, struct order *orders) {
+    struct contador_categoria {
+        char categoria[50];
+        int contador;
+    };
+
+    struct contador_categoria categorias[10];
+    int contador_categoria = 0;
+
+    for (int i = 0; i < *size; i++) {
+        int found = 0;
+        for (int j = 0; j < contador_categoria; j++) {
+            if (strcmp(categorias[j].categoria, orders[i].pizza_category) == 0) {
+                categorias[j].contador += orders[i].quantity;
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found && contador_categoria < 10) {
+            strcpy(categorias[contador_categoria].categoria, orders[i].pizza_category);
+            categorias[contador_categoria].contador = orders[i].quantity;
+            contador_categoria++;
+        }
+    }
+
+    // Construir la salida como una cadena
+
+    char *result = malloc(500);
+    if (!result) return "Error de memoria";
+
+    result[0] = "\0"; // Inicializar la cadena vacía
+
+    for (int i = 0; i < contador_categoria; i++) {
+        char line[100];
+        snprintf(line, siezof(line), "%s: %d\n", categorias[i].categoria, categorias[i].contador);
+        strcat(result, line);
+
+    }
+
+    return result;
 }
 
