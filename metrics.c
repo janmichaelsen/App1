@@ -279,3 +279,72 @@ char* hp(int *size, struct order *orders) {
     return result;
 }
 
+char* dmsp(int *size, struct order *orders) {
+    struct fecha {
+        char fecha[11];
+        int cantidad;
+    } fechas[MAX_ENTRIES];
+    int count = 0;
+
+    for (int i = 0; i < *size; i++) {
+        int found = 0;
+        for (int j = 0; j < count; j++) {
+            if (strcmp(fechas[j].fecha, orders[i].order_date) == 0) {
+                fechas[j].cantidad += orders[i].quantity;
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            strcpy(fechas[count].fecha, orders[i].order_date);
+            fechas[count].cantidad = orders[i].quantity;
+            count++;
+        }
+    }
+
+    int max_idx = 0;
+    for (int i = 1; i < count; i++) {
+        if (fechas[i].cantidad > fechas[max_idx].cantidad) {
+            max_idx = i;
+        }
+    }
+
+    char *result = malloc(60);
+    snprintf(result, 60, "%s: %d pizzas", fechas[max_idx].fecha, fechas[max_idx].cantidad);
+    return result;
+}
+
+char* dlsp(int *size, struct order *orders) {
+    struct fecha {
+        char fecha[11];
+        int cantidad;
+    } fechas[MAX_ENTRIES];
+    int count = 0;
+
+    for (int i = 0; i < *size; i++) {
+        int found = 0;
+        for (int j = 0; j < count; j++) {
+            if (strcmp(fechas[j].fecha, orders[i].order_date) == 0) {
+                fechas[j].cantidad += orders[i].quantity;
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            strcpy(fechas[count].fecha, orders[i].order_date);
+            fechas[count].cantidad = orders[i].quantity;
+            count++;
+        }
+    }
+
+    int min_idx = 0;
+    for (int i = 1; i < count; i++) {
+        if (fechas[i].cantidad < fechas[min_idx].cantidad) {
+            min_idx = i;
+        }
+    }
+
+    char *result = malloc(60);
+    snprintf(result, 60, "%s: %d pizzas", fechas[min_idx].fecha, fechas[min_idx].cantidad);
+    return result;
+}
